@@ -1,252 +1,117 @@
 <?php
 /**
- * The header for our theme
+ * The header for our theme.
  *
  * This is the template that displays all of the <head> section and everything up until <div id="content">
  *
- * @link https://developer.wordpress.org/themes/basics/template-files/#template-partials
+ * @link    https://developer.wordpress.org/themes/basics/template-files/#template-partials
  *
- * @package freenews
+ * @package Newspaper X
  */
 
-?>
-<!doctype html>
+?><!DOCTYPE html>
 <html <?php language_attributes(); ?>>
 <head>
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
-	<meta name="viewport" content="width=device-width">
-	<link rel="profile" href="https://gmpg.org/xfn/11">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="profile" href="http://gmpg.org/xfn/11">
+	<?php if ( is_singular() && pings_open( get_queried_object() ) ) : ?>
+		<link rel="pingback" href="<?php bloginfo( 'pingback_url' ); ?>">
+	<?php endif; ?>
 
 	<?php wp_head(); ?>
 </head>
 
 <body <?php body_class(); ?>>
-	<?php 
-	//wp_body_open hook from WordPress 5.2
-	if ( function_exists( 'wp_body_open' ) ) {
-	    wp_body_open();
-	} ?>
 <div id="page" class="site">
-	<a class="skip-link screen-reader-text" href="#content"><?php esc_html_e( 'Skip to content', 'freenews' ); ?></a>
-
+	<?php wp_body_open(); ?>
 	<?php
-	$disable_search_form = get_theme_mod('disable_search_form',0);
-	$show_banner = get_theme_mod('show_banner','home-page');
-	$disable_flash_news = get_theme_mod('disable_flash_news',0);
-	$disable_category_highlight_right = get_theme_mod('disable_category_highlight_right',0);
-	$disable_category_highlight_left = get_theme_mod('disable_category_highlight_left',0);
-	$disable_main_banner = get_theme_mod('disable_main_banner',0); ?>
+	/**
+	 * Enable / Disable the top bar
+	 */
+	$top_bar = get_theme_mod( 'newspaper_x_enable_top_bar', true );
+	if ( $top_bar ) :
+		get_template_part( 'template-parts/top-header' );
+	endif;
 
-	<header id="masthead" class="site-header">
-		<div id="main-header" class="main-header">
-			<div class="navigation-top">
-        		<div class="wrap">
-            	<div id="site-header-menu" class="site-header-menu">
-               	<nav class="main-navigation" aria-label="<?php esc_attr_e('Primary Menu','freenews'); ?>" role="navigation">
+	?>
+
+	<header id="masthead" class="site-header" role="banner">
+		<div class="site-branding container">
+			<div class="row">
+				<div class="col-md-4 header-logo">
+					<?php
+					$header_textcolor = get_theme_mod( 'header_textcolor' );
+					if ( function_exists( 'the_custom_logo' ) ) {
+						if ( has_custom_logo() ) {
+							the_custom_logo();
+						} else { ?>
 							<?php
-								/**
-								 * Top Navigation
-								 */
-								do_action('freenews_frontend_navigation_top'); 
-							?>
-						 </nav><!-- #site-navigation -->
-           		</div>
-        		</div><!-- .wrap -->
-			</div><!-- .navigation-top -->
-			<?php
-				/**
-				* Secondary Navigation
-				*/
-				do_action('freenews_frontend_secondary_navigation');
-			
-			if ($disable_flash_news ==0 || has_nav_menu('menu-2')) {
-			?>
-
-			<div class="top-header">
-				<div class="top-header-inner">
-
-					<?php
-						if($disable_flash_news==0){
-							/**
-							* Flash News
-							*/
-							do_action('freenews_frontend_flash_news');
-						}
-					?>
-
-					<div class="header-social-menu">
-
-						<?php
-							if(has_nav_menu('menu-2')){
-								/**
-								 * Social navigation
-								 */
-								do_action ('freenews_frontend_social_navigation');
-							}
-						?>
-
-					</div><!-- .header-social-menu -->
-				</div><!-- .top-header-inner -->
-			</div><!-- .top-header -->
-
-			<?php }
-			if ( ($disable_search_form == 0 ) || ( has_header_image() ) ){ ?>
-				<div class="header-media-search">
-
-					<?php
-						if ($disable_search_form == 0){
-							/**
-							* Search Form
-							*/
-							do_action('freenews_frontend_search_form');
-						}
-
-						if ( has_header_image() ) {
-							/**
-							* Header Image
-							*/
-							do_action ('freenews_frontend_header_image');
-						}
-					?>
-
-				</div><!-- .header-media-search -->
-			<?php } ?>
-			<div class="main-header-brand">
-				<div class="header-brand">
-					<div class="wrap">
-						<div class="header-brand-content">
-							<?php 
-
-								/**
-								 * Site Branding
-								 */
-								do_action ('freenews_frontend_site_branding');
-							?>
-
-							<div class="header-right">
-								<div class="header-banner">
-
-									<?php if ( is_active_sidebar( 'header-banner' ) ) {
-
-										dynamic_sidebar( 'header-banner' );
-
-									} ?>
-								</div><!-- .header-banner -->
-							</div><!-- .header-right -->
-						</div><!-- .header-brand-content -->
-					</div><!-- .wrap -->
-				</div><!-- .header-brand -->
-
-				<div id="nav-sticker">
-					<div class="navigation-top">
-						<div class="wrap">
-							<div id="site-header-menu" class="site-header-menu">
-								<nav id="site-navigation" class="main-navigation" aria-label="<?php esc_attr_e('Primary Menu','freenews'); ?>">
-								<?php
-
-									/**
-									 * Top Navigation
-									 */
-									do_action('freenews_frontend_navigation_top');
-
+							if ( $header_textcolor !== 'blank' ):
 								?>
-								</nav><!-- #site-navigation -->
-            			</div>
-        				</div><!-- .wrap -->
-     				</div><!-- .navigation-top -->
-				<div class="clock"> 
-					<div id="time"></div>
-					<div id="date"><?php echo date_i18n(__('l, F d, Y','freenews')); ?></div>
+								<a class="site-title"
+								   href="<?php echo esc_url( get_home_url() ) ?>"> <?php echo esc_html( get_option( 'blogname', 'newspaper-x' ) ) ?></a>
+							<?php endif; ?>
+							<?php
+							$description = get_bloginfo( 'description', 'display' );
+							if ( $header_textcolor !== 'blank' && ! empty( $description ) ) : ?>
+								<p class="site-description"><?php echo wp_kses_post( $description ); /* WPCS: xss ok. */ ?></p>
+								<?php
+							endif;
+						}
+					}
+					?>
 				</div>
-				</div><!-- #nav-sticker -->
+
 				<?php
-					/**
-					 * Secondary Navigation
-					 */
-					do_action('freenews_frontend_secondary_navigation');
+				$enable_banner = get_theme_mod( 'newspaper_x_show_banner_on_homepage', true );
 				?>
-			</div><!-- .main-header-brand -->
-			<?php if( $disable_category_highlight_right == 0 || $disable_category_highlight_left ==0 || $disable_main_banner ==0 ) { ?>
-			
-					<?php
-					/**
-					* Main Banner
-					*/
 
-					if($show_banner=='home-page' ){
-						if ( is_front_page() && is_home() ) {
-							do_action ('freenews_frontend_mainbanner_before'); 
+				<?php if ( $enable_banner ): ?>
+					<div class="col-md-8 header-banner">
+						<?php
+						$banner = get_theme_mod( 'newspaper_x_banner_type', 'image' );
+						get_template_part( 'template-parts/banner/banner', $banner );
+						?>
+					</div>
+				<?php endif; ?>
+			</div>
+		</div><!-- .site-branding -->
+		<nav id="site-navigation" class="main-navigation" role="navigation">
+			<div class="container">
+				<div class="row">
+					<div class="col-md-12">
+						<button class="menu-toggle" aria-controls="primary-menu"
+						        aria-expanded="false"><span class="fa fa-bars"></span></button>
+						<?php
+						if ( has_nav_menu( 'primary' ) ) {
+							wp_nav_menu( array(
+								             'theme_location' => 'primary',
+								             'menu_id'        => 'primary-menu'
+							             ) );
+						} else {
+							?>
+							<div class="menu-all-pages-container">
+								<ul id="primary-menu" class="menu nav-menu" aria-expanded="false">
+									<?php if ( current_user_can( 'administrator' ) ): ?>
+										<li>
+											<a href="<?php echo esc_url( admin_url( 'nav-menus.php' ) ); ?>"><?php echo esc_html__( 'Add a menu', 'newspaper-x' ); ?></a>
+										</li>
+									<?php else: ?>
+										<li>
+											<a href="<?php echo esc_url( get_home_url() ); ?>"><?php echo esc_html__( 'Home', 'newspaper-x' ); ?></a>
+										</li>
+									<?php endif; ?>
+								</ul>
+							</div>
+							<?php
+						} ?>
+					</div>
+				</div>
+			</div>
 
-							// Default homepage
-							do_action ('freenews_frontend_hightlight_category_left');
-							do_action('freenews_frontend_main_banner');
-							do_action('freenews_frontend_hightlight_category_right');
-
-							do_action ('freenews_frontend_mainbanner_after');
-
-
-							} elseif ( is_front_page()){
-								do_action ('freenews_frontend_mainbanner_before');
-
-								//Static homepage
-								do_action ('freenews_frontend_hightlight_category_left');
-								do_action('freenews_frontend_main_banner');
-								do_action('freenews_frontend_hightlight_category_right');
-
-								do_action ('freenews_frontend_mainbanner_after');
-							}
-					} elseif ($show_banner=='static-homepage') {
-						do_action ('freenews_frontend_mainbanner_before');
-
-							if ( is_front_page()){
-								//Static homepage
-									do_action ('freenews_frontend_hightlight_category_left');
-									do_action('freenews_frontend_main_banner');
-									do_action('freenews_frontend_hightlight_category_right');
-
-								}
-						do_action ('freenews_frontend_mainbanner_after');
-
-							} elseif ($show_banner=='blog') {
-							do_action ('freenews_frontend_mainbanner_before');
-
-								if ( is_home()){
-								//Blog page
-									do_action ('freenews_frontend_hightlight_category_left');
-									do_action('freenews_frontend_main_banner');
-									do_action('freenews_frontend_hightlight_category_right');
-
-									}
-
-							do_action ('freenews_frontend_mainbanner_after'); ?>
-							<?php } else {
-								//everything else
-								do_action ('freenews_frontend_mainbanner_before');
-
-								do_action ('freenews_frontend_hightlight_category_left');
-								do_action('freenews_frontend_main_banner');
-								do_action('freenews_frontend_hightlight_category_right');
-
-								do_action ('freenews_frontend_mainbanner_after');
-							}
-				
-		} ?>
-		</div><!-- .main-header -->
+		</nav><!-- #site-navigation -->
 	</header><!-- #masthead -->
 
-	<div id="content" class="site-content">
-		<div class="site-content-cell">
-			<?php if ( ( is_front_page() && is_home() ) || is_front_page() ) {
-			// Default homepage
-				if ( is_active_sidebar( 'advertise-area' ) ) { ?>
-					<div class="advertise-area">
-						<div class="wrap">
-
-							<?php dynamic_sidebar( 'advertise-area' ); ?>
-
-						</div><!-- .wrap -->
-					</div><!-- .advertise-area -->
-
-				<?php }
-
-			} ?>
+	<div id="content" class="site-content container">
+		

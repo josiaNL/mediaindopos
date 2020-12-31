@@ -1,150 +1,90 @@
 <?php
 /**
- * Template part for displaying posts
+ * Template part for displaying posts.
  *
- * @link https://developer.wordpress.org/themes/basics/template-hierarchy/
+ * @link    https://codex.wordpress.org/Template_Hierarchy
  *
- * @package freenews
+ * @package Newspaper X
  */
 
+$breadcrumbs_enabled = get_theme_mod( 'newspaper_x_enable_post_breadcrumbs', true );
+if ( $breadcrumbs_enabled && is_single() ) {
+	Newspaper_X_Helper::add_breadcrumbs();
+}
 ?>
-<?php 
-$disable_category = get_theme_mod('disable-cateogry',0);
-$disable_date = get_theme_mod('disable-date',0);
-$disable_author = get_theme_mod('disable-author',0);
-$disable_comments = get_theme_mod('disable-comments',0);
-$tags_list = get_the_tag_list( '', esc_html_x( ', ', 'list item separator', 'freenews' ) );
-$excerpt_display = get_theme_mod('excerpt-display','excerpt-content');
-$sticky_text = get_theme_mod ('sticky_text',esc_html__('Featured','freenews'));
-?>
-
 <article id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
-	<?php 
-	$disable_featured_image_single = get_theme_mod('disable_featured_image_single',0);
-	if (! is_single() || ($disable_featured_image_single ==0 && is_single() ) ):
-
-		freenews_post_thumbnail();
-
-	endif;
-
-	if ( is_sticky() ) { ?>
-
-		<div class="sticky-post-tag">
-
-			<span class="sticky-name"><?php echo esc_html( $sticky_text ); ?></span>
-
-   	</div>
-
-	<?php } ?>
-
-	<div class="entry-content-holder">
-		<header class="entry-header">
-
-		<?php
-
-		$excerpt_text = get_theme_mod('excerpt_text',esc_html__('Read More','freenews'));
-		
-		if ( 'post' === get_post_type() ) :
-
-			if($disable_category ==0) { ?>
-
-				<div class="entry-meta">
-
-					<?php freenews_cat_lists (); ?>
-
-				</div><!-- .entry-meta -->
-			<?php }
-
-		if ( is_singular() ) :
-
-				the_title( '<h1 class="entry-title">', '</h1>' );
-
-			else :
-
-				the_title( '<h2 class="entry-title"><a href="' . esc_url( get_permalink() ) . '" rel="bookmark">', '</a></h2>' );
-
-			endif;
-
-		if( $disable_date ==0 || $disable_author ==0 ){ ?>
-
-		<div class="entry-meta">
+    <header class="entry-header">
+        <div class="newspaper-x-image">
 			<?php
-			if($disable_author ==0){
-
-				freenews_posted_by();
-
+			$image = '<img class="wp-post-image" alt="" src="' . get_template_directory_uri() . '/assets/images/picture_placeholder.jpg" />';
+			if ( has_post_thumbnail() ) {
+				$image = is_single() ? get_the_post_thumbnail( get_the_ID(), 'newspaper-x-single-post' ) : get_the_post_thumbnail( get_the_ID(), 'newspaper-x-recent-post-big' );
 			}
-			if($disable_date ==0){
 
-				freenews_posted_on();
+			$image_obj = array( 'id' => get_the_ID(), 'image' => $image );
+			$new_image = apply_filters( 'newspaper_x_widget_image', $image_obj );
 
-			}
-			?>
-		</div><!-- .entry-meta -->
-
-		<?php } 
-
-	 endif; ?>
-
-	</header><!-- .entry-header -->
-
-	<div class="entry-content">
-		<?php
-		if(is_single()){
-
-			the_content();
-
-		} else {
-
-			if($excerpt_display == 'full-content'){
-
-				the_content( sprintf(
-				wp_kses(
-					/* translators: %s: Name of current post. Only visible to screen readers */
-					$excerpt_text. '<span class="screen-reader-text"> "%s"</span>',
-					array(
-						'span' => array(
-							'class' => array(),
-						),
-					)
+			$allowed_tags = array(
+				'img'      => array(
+					'data-srcset' => true,
+					'data-src'    => true,
+					'srcset'      => true,
+					'sizes'       => true,
+					'src'         => true,
+					'class'       => true,
+					'alt'         => true,
+					'width'       => true,
+					'height'      => true
 				),
-				get_the_title()
-			) );
-			} else {
-				the_excerpt();
-			}
+				'noscript' => array()
+			);
+
+			echo ! is_single() ? '<a href="' . esc_url( get_permalink() ) . '" rel="bookmark">' : '';
+
+			echo wp_kses( $new_image, $allowed_tags );
+
+			echo ! is_single() ? '</a>' : '';
+			?>
+        </div>
+		<?php
+		if ( ! is_single() ) {
+			echo '<h4 class="entry-title"><a href="' . esc_url( get_permalink() ) . '" rel="bookmark">' . wp_trim_words( get_the_title(), 8 ) . '</a></h4>';
 		}
 
-		wp_link_pages( array(
-			'before' => '<div class="page-links">' . esc_html__( 'Pages:', 'freenews' ),
-			'after'  => '</div>',
-		) );
+		if ( 'post' === get_post_type() ) : ?>
+            <div class="newspaper-x-post-meta">
+				<?php Newspaper_X_Helper::posted_on(); ?>
+            </div><!-- .entry-meta -->
+			<?php
+		endif; ?>
+		<?php
+		if ( is_single() ) {
+			the_title( '<h2 class="entry-title">', '</h2>' );
+		}
 		?>
+    </header><!-- .entry-header -->
 
-	</div><!-- .entry-content -->
+    <div class="entry-content">
+		<?php
+		if ( is_single() ) {
+			the_content();
+		} else {
+			echo '<p>' . wp_trim_words( wp_kses_post( get_the_content( esc_html__( 'Read More', 'newspaper-x' ) ) ), 35 ) . '</p>';
+		}
+		?>
+    </div><!-- .entry-content -->
 
-	<?php if( $disable_comments ==0 || !empty($tags_list) ) { ?>
+    <footer class="entry-footer">
+		<?php
+		if ( is_single() ) {
+			// Include author information
+			get_template_part( 'template-parts/author-info' );
 
-		<footer class="entry-footer">
-			<div class="entry-meta">
+		}
+		?>
+    </footer><!-- .entry-footer -->
 
-				<?php
-				if(!empty($tags_list) ) {
+	<?php if ( is_single() ):do_action( 'newspaper_x_single_after_article' ); endif; ?>
 
-					freenews_tag_lists();
+</article><!-- #post-## -->
 
-				}
-				
-				if( $disable_comments ==0 ) {
-
-					freenews_comment_links();
-
-				}
-
-				?>
-			</div><!-- .entry-meta -->
-		</footer><!-- .entry-footer -->
-			
-	<?php } ?>
-	</div><!-- .entry-content-holder -->
-</article><!-- #post-<?php the_ID(); ?> -->
